@@ -74,18 +74,28 @@ def on_seg_interior(pt, a, b):
 
 
 def inter(a, b, c0, d0):
-    """strict interior crossing of two axis-aligned segments"""
+    """strict interior crossing of two axis-aligned segments
+
+    2026-11-14 修正：原实现两个分支里都拿「被该分支固定住的那一维」做严格不等判断，
+    例如 `ax0 == ax1` 时判 `min(ax1,ax0) < x < max(ax1,ax0)`，而此时
+    `x == ax0 == ax1` → 区间退化成一个点 → 恒为 False。结果是**任何真实交叉都检测不到**，
+    工具永远打印 crossings: 0 / RESULT: PASS。
+    现在按定义判：交点的 x 必须严格落在水平段的 x 区间内，y 严格落在垂直段的 y 区间内。
+    """
     (ax0, ay0), (ax1, ay1) = a, b
     (cx0, cy0), (cx1, cy1) = c0, d0
+    # a 竖直(x 固定) + c 水平(y 固定) → 交点为 (ax0, cy0)
     if ax0 == ax1 and cy0 == cy1:
         x, y = ax0, cy0
-        return (min(ax1, ax0) < x < max(ax1, ax0) or False) and min(cx0, cx1) < x < max(cx0, cx1) \
-            and min(ay0, ay1) < y < max(ay0, ay1)
+        return (min(cx0, cx1) < x < max(cx0, cx1)
+                and min(ay0, ay1) < y < max(ay0, ay1))
+    # a 水平(y 固定) + c 竖直(x 固定) → 交点为 (cx0, ay0)
     if ay0 == ay1 and cx0 == cx1:
         x, y = cx0, ay0
-        return min(cx0, cx1) < x < max(cx0, cx1) and min(ax0, ax1) < x < max(ax0, ax1) \
-            and min(cy0, cy1) < y < max(cy0, cy1)
+        return (min(ax0, ax1) < x < max(ax0, ax1)
+                and min(cy0, cy1) < y < max(cy0, cy1))
     return False
+
 
 
 crossings = []

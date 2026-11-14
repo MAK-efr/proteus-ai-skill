@@ -48,10 +48,16 @@ def main():
         rec(FAIL, "proteus_env", ENV_ERROR or "导入失败")
         return report(verbose)
 
+    # 上游 15 个模块 + 本项目自有的 papi.py = 16。
+    # proteus_env 单独在上面检查过，不重复。
+    # 注意：clone_research / connectivity_research 看着像"研究脚本"没用，但
+    # proteus_automatic_api.py 顶部就 import 它们，缺了整包导入即崩 —— 必须查。
     mods = ["proteus_native", "proteus_project", "proteus_session", "component_codec",
             "wire_codec", "device_library", "pin_geometry", "net_edit", "net_objects",
             "measurements", "simulation", "interactive_native",
+            "clone_research", "connectivity_research",
             "proteus_automatic_api", "papi"]
+
     ok, bad = [], []
     for m in mods:
         try:

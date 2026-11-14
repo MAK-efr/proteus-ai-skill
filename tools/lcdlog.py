@@ -24,7 +24,13 @@ add_self_to_path()
 import papi
 
 
-REC = re.compile(r"@\[GPIO\] drive PIO2\.(\w) = (\d)")
+# 真实原生日志行长这样（Proteus 8.16，见 python/simulation.py 的 gpio 解析式）：
+#     [GPIO] drive PIO2.0 = 1 [U1_SYSINTERFACE] @0.002563000s
+# 原正则写成 r"@\[GPIO\] drive ..."，把 `@时间戳` 的 @ 当成了行首，而真实行首是 `[GPIO]`，
+# 于是对任何真实日志 0 命中、decode() 永远返回空 —— 而它只对 papi._heap_text 产生的
+# 畸形行（时间在前、消息在后）匹配，两个 bug 互相掩盖。2026-11-14 修正。
+REC = re.compile(r"\[GPIO\] drive PIO2\.(\d+) = ([01])")
+
 
 
 def decode(lines):

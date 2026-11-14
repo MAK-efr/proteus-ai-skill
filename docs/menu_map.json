@@ -1,0 +1,662 @@
+[
+ {
+  "path": "File/Import Image",
+  "command_id": 16,
+  "enabled": true
+ },
+ {
+  "path": "File/Import Project Clip",
+  "command_id": 19,
+  "enabled": true
+ },
+ {
+  "path": "File/Export Project Clip",
+  "command_id": 20,
+  "enabled": false
+ },
+ {
+  "path": "File/Export Graphics/Export Vector File",
+  "command_id": 21,
+  "enabled": true
+ },
+ {
+  "path": "File/Export Graphics/Export Bitmap",
+  "command_id": 22,
+  "enabled": true
+ },
+ {
+  "path": "File/Export Graphics/Export Metafile",
+  "command_id": 23,
+  "enabled": true
+ },
+ {
+  "path": "File/Export Graphics/Export DXF File",
+  "command_id": 24,
+  "enabled": true
+ },
+ {
+  "path": "File/Export Graphics/Export Encapsulated Postscript",
+  "command_id": 25,
+  "enabled": true
+ },
+ {
+  "path": "File/Export Graphics/Export Adobe PDF File",
+  "command_id": 26,
+  "enabled": true
+ },
+ {
+  "path": "File/Export Graphics/Export SVG File",
+  "command_id": 28,
+  "enabled": true
+ },
+ {
+  "path": "Edit/Find/Edit Component",
+  "command_id": 32,
+  "enabled": true
+ },
+ {
+  "path": "Edit/Tidy Design",
+  "command_id": 33,
+  "enabled": true
+ },
+ {
+  "path": "Edit/Send To Back",
+  "command_id": 34,
+  "enabled": false
+ },
+ {
+  "path": "Edit/Bring To Front",
+  "command_id": 35,
+  "enabled": false
+ },
+ {
+  "path": "Edit/Align Objects",
+  "command_id": 37,
+  "enabled": false
+ },
+ {
+  "path": "Tool/Wire Autorouter",
+  "command_id": 49,
+  "enabled": true
+ },
+ {
+  "path": "Tool/Property Assignment Tool",
+  "command_id": 50,
+  "enabled": true
+ },
+ {
+  "path": "Tool/Search  Tag",
+  "command_id": 51,
+  "enabled": true
+ },
+ {
+  "path": "Tool/Global Annotator",
+  "command_id": 55,
+  "enabled": true
+ },
+ {
+  "path": "Tool/ASCII Data Import Tool",
+  "command_id": 56,
+  "enabled": true
+ },
+ {
+  "path": "Tool/Electrical Rules Check",
+  "command_id": 57,
+  "enabled": true
+ },
+ {
+  "path": "Tool/Netlist Compiler",
+  "command_id": 59,
+  "enabled": true
+ },
+ {
+  "path": "Tool/Model Compiler",
+  "command_id": 60,
+  "enabled": true
+ },
+ {
+  "path": "Design/Edit Design Properties",
+  "command_id": 64,
+  "enabled": true
+ },
+ {
+  "path": "Design/Edit Sheet Properties",
+  "command_id": 65,
+  "enabled": true
+ },
+ {
+  "path": "Design/Edit Design Notes",
+  "command_id": 66,
+  "enabled": true
+ },
+ {
+  "path": "Design/New Sheet",
+  "command_id": 67,
+  "enabled": true
+ },
+ {
+  "path": "Design/Remove/Delete Sheet",
+  "command_id": 68,
+  "enabled": true
+ },
+ {
+  "path": "Design/Goto Sheet",
+  "command_id": 69,
+  "enabled": true
+ },
+ {
+  "path": "Design/Exit to Parent Sheet",
+  "command_id": 71,
+  "enabled": true
+ },
+ {
+  "path": "Design/Configure Power Rails...",
+  "command_id": 73,
+  "enabled": true
+ },
+ {
+  "path": "Design/Goto Previous Sheet",
+  "command_id": 74,
+  "enabled": true
+ },
+ {
+  "path": "Design/Goto Next Sheet",
+  "command_id": 75,
+  "enabled": true
+ },
+ {
+  "path": "Template/Goto Master Sheet",
+  "command_id": 76,
+  "enabled": true
+ },
+ {
+  "path": "Graph/Verify Graphs",
+  "command_id": 84,
+  "enabled": true
+ },
+ {
+  "path": "Graph/Verify Files",
+  "command_id": 91,
+  "enabled": true
+ },
+ {
+  "path": "System/Text Viewer",
+  "command_id": 97,
+  "enabled": true
+ },
+ {
+  "path": "System/Set Sheet Sizes",
+  "command_id": 101,
+  "enabled": true
+ },
+ {
+  "path": "System/Set Text Editor",
+  "command_id": 102,
+  "enabled": true
+ },
+ {
+  "path": "System/Set Animation Options",
+  "command_id": 103,
+  "enabled": true
+ },
+ {
+  "path": "System/Set Simulation Options",
+  "command_id": 104,
+  "enabled": true
+ },
+ {
+  "path": "System/Set Keyboard Mapping",
+  "command_id": 105,
+  "enabled": true
+ },
+ {
+  "path": "System/Set Display Options",
+  "command_id": 106,
+  "enabled": true
+ },
+ {
+  "path": "System/Restore Default Settings",
+  "command_id": 107,
+  "enabled": true
+ },
+ {
+  "path": "Help/Schematic Capture Help",
+  "command_id": 112,
+  "enabled": true
+ },
+ {
+  "path": "Help/Simulation Help",
+  "command_id": 113,
+  "enabled": true
+ },
+ {
+  "path": "Help/VSM Model/SDK Help",
+  "command_id": 114,
+  "enabled": true
+ },
+ {
+  "path": "Help/Schematic Capture Tutorial",
+  "command_id": 118,
+  "enabled": true
+ },
+ {
+  "path": "Template/Set Design Colours",
+  "command_id": 160,
+  "enabled": true
+ },
+ {
+  "path": "Template/Set Graph  Trace Colours",
+  "command_id": 161,
+  "enabled": true
+ },
+ {
+  "path": "Template/Set Graphic Styles",
+  "command_id": 162,
+  "enabled": true
+ },
+ {
+  "path": "Template/Set Text Styles",
+  "command_id": 163,
+  "enabled": true
+ },
+ {
+  "path": "Template/Set 2D Graphics Defaults",
+  "command_id": 164,
+  "enabled": true
+ },
+ {
+  "path": "Template/Set Junction Dot Style",
+  "command_id": 165,
+  "enabled": true
+ },
+ {
+  "path": "Template/Apply Styles From Template",
+  "command_id": 166,
+  "enabled": true
+ },
+ {
+  "path": "Template/Save Design as Template",
+  "command_id": 168,
+  "enabled": true
+ },
+ {
+  "path": "System/Set Property Definitions",
+  "command_id": 169,
+  "enabled": true
+ },
+ {
+  "path": "Library/Pick Parts",
+  "command_id": 208,
+  "enabled": true
+ },
+ {
+  "path": "Library/Make Device",
+  "command_id": 210,
+  "enabled": true
+ },
+ {
+  "path": "Library/Make Symbol",
+  "command_id": 214,
+  "enabled": true
+ },
+ {
+  "path": "Library/Decompose",
+  "command_id": 215,
+  "enabled": true
+ },
+ {
+  "path": "Library/Packaging Tool",
+  "command_id": 216,
+  "enabled": true
+ },
+ {
+  "path": "Library/Compile To Library",
+  "command_id": 217,
+  "enabled": true
+ },
+ {
+  "path": "Library/Verify Packagings",
+  "command_id": 218,
+  "enabled": true
+ },
+ {
+  "path": "Library/Place Library",
+  "command_id": 219,
+  "enabled": true
+ },
+ {
+  "path": "Library/Manage Changes",
+  "command_id": 220,
+  "enabled": true
+ },
+ {
+  "path": "Library/Library Manager",
+  "command_id": 221,
+  "enabled": true
+ },
+ {
+  "path": "Library/Import Parts",
+  "command_id": 223,
+  "enabled": true
+ },
+ {
+  "path": "File/Print Design",
+  "command_id": 309,
+  "enabled": true
+ },
+ {
+  "path": "File/Print Setup",
+  "command_id": 310,
+  "enabled": true
+ },
+ {
+  "path": "File/Mark Output Area",
+  "command_id": 311,
+  "enabled": true
+ },
+ {
+  "path": "File/Printer Information",
+  "command_id": 313,
+  "enabled": true
+ },
+ {
+  "path": "File/Exit Application",
+  "command_id": 315,
+  "enabled": true
+ },
+ {
+  "path": "View/Redraw Display",
+  "command_id": 320,
+  "enabled": true
+ },
+ {
+  "path": "View/Toggle False Origin",
+  "command_id": 322,
+  "enabled": true
+ },
+ {
+  "path": "View/Toggle X-Cursor",
+  "command_id": 325,
+  "enabled": true
+ },
+ {
+  "path": "View/Snap 10th",
+  "command_id": 326,
+  "enabled": true
+ },
+ {
+  "path": "View/Toggle Grid",
+  "command_id": 327,
+  "enabled": true
+ },
+ {
+  "path": "View/Center At Cursor",
+  "command_id": 328,
+  "enabled": true
+ },
+ {
+  "path": "View/Zoom In",
+  "command_id": 329,
+  "enabled": true
+ },
+ {
+  "path": "View/Zoom Out",
+  "command_id": 330,
+  "enabled": true
+ },
+ {
+  "path": "View/Zoom To View Entire Sheet",
+  "command_id": 331,
+  "enabled": true
+ },
+ {
+  "path": "View/Zoom To Area",
+  "command_id": 332,
+  "enabled": true
+ },
+ {
+  "path": "View/Toolbar Configuration",
+  "command_id": 335,
+  "enabled": true
+ },
+ {
+  "path": "Edit/Undo Changes",
+  "command_id": 336,
+  "enabled": true
+ },
+ {
+  "path": "Edit/Redo Changes",
+  "command_id": 337,
+  "enabled": false
+ },
+ {
+  "path": "Edit/Cut To Clipboard",
+  "command_id": 338,
+  "enabled": false
+ },
+ {
+  "path": "Edit/Copy To Clipboard",
+  "command_id": 339,
+  "enabled": true
+ },
+ {
+  "path": "Edit/Paste From Clipboard",
+  "command_id": 340,
+  "enabled": false
+ },
+ {
+  "path": "Edit/Select All Objects",
+  "command_id": 341,
+  "enabled": true
+ },
+ {
+  "path": "Edit/Clear Selection",
+  "command_id": 342,
+  "enabled": false
+ },
+ {
+  "path": "File/New Project",
+  "command_id": 512,
+  "enabled": true
+ },
+ {
+  "path": "File/Import Legacy Project",
+  "command_id": 513,
+  "enabled": true
+ },
+ {
+  "path": "File/Open Project",
+  "command_id": 514,
+  "enabled": true
+ },
+ {
+  "path": "File/Open Sample Project",
+  "command_id": 515,
+  "enabled": true
+ },
+ {
+  "path": "File/Save Project",
+  "command_id": 516,
+  "enabled": true
+ },
+ {
+  "path": "File/Save Project As",
+  "command_id": 517,
+  "enabled": true
+ },
+ {
+  "path": "File/Close Project",
+  "command_id": 518,
+  "enabled": true
+ },
+ {
+  "path": "File/Explore Project Folder",
+  "command_id": 519,
+  "enabled": true
+ },
+ {
+  "path": "File/Edit Project Description",
+  "command_id": 520,
+  "enabled": true
+ },
+ {
+  "path": "File/Import ECAD Files",
+  "command_id": 524,
+  "enabled": true
+ },
+ {
+  "path": "System/System Settings",
+  "command_id": 528,
+  "enabled": true
+ },
+ {
+  "path": "Help/Overview",
+  "command_id": 544,
+  "enabled": true
+ },
+ {
+  "path": "Help/About Proteus 8",
+  "command_id": 545,
+  "enabled": true
+ },
+ {
+  "path": "Help/About Qt",
+  "command_id": 546,
+  "enabled": true
+ },
+ {
+  "path": "Graph/Edit Graph...",
+  "command_id": 560,
+  "enabled": true
+ },
+ {
+  "path": "Graph/Add Traces...",
+  "command_id": 562,
+  "enabled": true
+ },
+ {
+  "path": "Graph/Simulate Graph",
+  "command_id": 564,
+  "enabled": true
+ },
+ {
+  "path": "Graph/View Simulation Log",
+  "command_id": 566,
+  "enabled": true
+ },
+ {
+  "path": "Graph/Export Graph Data...",
+  "command_id": 567,
+  "enabled": true
+ },
+ {
+  "path": "Graph/Clear Graph Data...",
+  "command_id": 568,
+  "enabled": true
+ },
+ {
+  "path": "Graph/Play Audio",
+  "command_id": 569,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Run Simulation",
+  "command_id": 576,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Run Simulation (no breakpoints)",
+  "command_id": 577,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Run Simulation (timed breakpoint)",
+  "command_id": 578,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Start VSM Debugging",
+  "command_id": 579,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Pause VSM Debugging",
+  "command_id": 581,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Stop VSM Debugging",
+  "command_id": 582,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Step Over Source Line",
+  "command_id": 583,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Step Into Source Line",
+  "command_id": 584,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Step Out from Source Line",
+  "command_id": 585,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Run To Source Line",
+  "command_id": 586,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Animated Single Step",
+  "command_id": 587,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Reset Debug Popup Windows",
+  "command_id": 588,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Reset Persistent Model Data",
+  "command_id": 589,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Configure Diagnostics",
+  "command_id": 590,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Enable Remote Debug Monitor",
+  "command_id": 591,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Horz. Tile Popup Windows",
+  "command_id": 592,
+  "enabled": true
+ },
+ {
+  "path": "Debug/Vertical Tile Popup Windows",
+  "command_id": 593,
+  "enabled": true
+ },
+ {
+  "path": "View/Snap 50th",
+  "command_id": 4422,
+  "enabled": true
+ },
+ {
+  "path": "View/Snap 0.1in",
+  "command_id": 8518,
+  "enabled": true
+ },
+ {
+  "path": "View/Snap 0.5in",
+  "command_id": 12614,
+  "enabled": true
+ }
+]

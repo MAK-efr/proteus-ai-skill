@@ -20,7 +20,8 @@ set_firmware、measurements.graphs、Circuit/Project/Library）实测可用，�
 
 另外提供 `cmd()`：直接把任意原生菜单命令按 command_id 发出去，绕开库没包装的能力
 （单步、Run To Source Line、Reset Persistent Model Data、Graph/Add Traces 等）。
-完整命令表见同目录 `menu_map.md`（本机导出 140 条）。
+完整命令表见 `docs/MENU_MAP.md`（本机导出 140 条，其中 132 条可静态引用；
+`File/1`–`File/8` 是动态分配的最近工程项，不要硬编码）。
 """
 import ctypes as c
 import time
@@ -45,7 +46,7 @@ from simulation import Simulation, gpio_events as _parse_gpio
 
 u, k = native.u, native.k
 
-# ---- 实测可用的原生命令号（本机 PDS 8.16 SP3，完整表见 menu_map.md）----
+# ---- 实测可用的原生命令号（本机 PDS 8.16 SP3，完整表见 docs/MENU_MAP.md）----
 CMD_RUN = 576
 CMD_RUN_NOBP = 577
 CMD_RUN_TIMED = 578

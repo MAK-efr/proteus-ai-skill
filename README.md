@@ -47,6 +47,8 @@ Requires: Windows, Proteus 8.16, Python ≥ 3.10 (Pillow only for the screenshot
 | 抓仿真画面并自动裁出 LCD 区域 | `tools/shot_lcd.py` | ✅ |
 | 不开截图、直接从 GPIO 事件流还原 LCD 文本 | `tools/lcdlog.py` / `tools/lcdgpio.py` | ✅ |
 | 校验 Intel HEX 的向量表（SP/RESET 是否合法） | `tools/checkhex.py` | ✅ |
+| **一条命令体检环境**（缺什么、哪项功能受限） | `tools/doctor.py` | ✅ |
+
 | 统计走线交叉、走线压到无关引脚 | `tools/crossings.py` | ✅ |
 | 用 armcc + fromelf 出 hex 并顺手断言 | `tools/build_cal.ps1` | ✅ |
 | 程序化按按钮 / 拨开关 | `Sim.press/release/set_switch` | ✅ 需先 `bind_controls` |
@@ -72,8 +74,14 @@ pip install pillow          # 只有截图类工具需要；纯文本判读不�
 
 # 2) 自检：仓库自带全部依赖模块，不需要往 site-packages 里拷任何东西
 $env:PYTHONPATH = "$PWD\python"
-python -c "import papi, component_codec; print('ok')"
+python tools\doctor.py -v
 ```
+
+`doctor.py` 会逐项告诉你：模块够不够、`PDS.EXE` 和器件库找没找到、
+`WINCORE.DLL` 指纹对不对（不对则读不到仿真秒数）、Pillow 缺不缺。
+**先跑它，再排障** —— 否则你分不清"代码有问题"还是"环境没配好"。
+退出码 0 表示关键项全过，可以往下走了。
+
 
 **路径全部自动探测，不需要手改源码。** 三个环境变量只在探测失败时才要设：
 
@@ -159,10 +167,21 @@ PDS 8.16 SP3 有约 1/2 概率在"启动后刚推进仿真"时自杀（退出码
 
 ---
 
-## 六、许可与出处
+## 六、文档地图
 
-- 本项目自有代码（`python/papi.py`、`tools/*`、文档）：**MIT**，见 `LICENSE`。
-- `python/` 下 `component_codec.py`、`wire_codec.py`、`proteus_session.py`、`proteus_native.py`、`proteus_project.py`、`proteus_automatic_api.py`、`simulation.py` 来自 **proteus-automatic-api 0.2.0**（MIT，Copyright (c) 2026 proteus-automatic-api contributors），**含本机适配补丁**，逐条差异见 `NOTICE`。
+| 文件 | 什么时候看 |
+|---|---|
+| `tools/doctor.py` | **第一件事**：环境体检，缺什么一目了然 |
+| [`docs/LIMITS.md`](docs/LIMITS.md) | 上手前必读：哪些器件/操作根本不支持，省你半天 |
+| [`docs/VERIFY.md`](docs/VERIFY.md) | 想核实"这些结论真的实测过吗"——每条的原始数据都在这里 |
+| [`docs/API_MAP.md`](docs/API_MAP.md) | 想扩展能力：三层能力模型、哪些接口能用、哪些坏了、怎么绕 |
+| [`docs/MENU_MAP.md`](docs/MENU_MAP.md) + `docs/menu_map.json` | 库没包的能力按 `command_id` 直发菜单命令（140 条） |
+| `SKILL.md` | 给 AI agent 读的操作手册（人类也能读，但更啰嗦） |
+| `patches/*.patch` | 相对上游 0.2.0 的逐字节差异 |
+
+## 七、许可与出处
+
+- 本项目自有代码（`python/papi.py`、`python/proteus_env.py`、`tools/*`、文档）：**MIT**，见 `LICENSE`。
+- `python/` 下其余 15 个模块来自 **proteus-automatic-api 0.2.0**（MIT，Copyright (c) 2026 proteus-automatic-api contributors）。其中 `component_codec.py` 与 `proteus_session.py` **含本机适配补丁**，逐条差异见 `NOTICE` 与 `patches/`。
 - 本项目**不分发** Proteus 软件、器件库或 Keil/armcc。
 
-上手前请先读 [`docs/LIMITS.md`](docs/LIMITS.md)：那里列了"一个设计只能放一片 STM32""DS18B20/DS1620/LM75 全部不可用""会把器件记录写坏的器件名黑名单"等等 —— 这些都是花了很多时间才确认的，看一眼能省你半天。

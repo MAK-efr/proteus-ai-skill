@@ -23,6 +23,10 @@ Copyright (c) 2026 proteus-automatic-api contributors
 | `python/proteus_env.py` | 路径解析层。上游把 `PDS.EXE` 和器件库默认值写死成作者机器上的路径（后者的默认值 `C:\ProgramData\program\LIBRARY` 在正常安装里根本不存在）。本文件改成环境变量优先 + 常见安装位置探测，让仓库可以跨机器直接用。 |
 | `tools/shot_lcd.py` | 同一会话内增量推进到多个时刻、整窗截图、按橄榄绿面板自动定位并裁剪 LCD。2026-11-14 追加 `finally close` 与自动重试。 |
 | `tools/checkhex.py` | Intel HEX 向量表断言（SP 必须落在 SRAM、RESET 必须是 Thumb 地址且在 Flash 内）。 |
+| `tools/doctor.py` | 环境自检：模块完整性、`PDS.EXE`、器件库、`WINCORE.DLL` 指纹、Pillow。只读，不启动 Proteus。 |
+| `docs/API_MAP.md` | 三层能力模型与逐接口实测状态（能用/坏了/怎么绕）。作者本机逆向产物，已脱敏。 |
+| `docs/MENU_MAP.md` + `docs/menu_map.json` | 140 条原生菜单命令表（去掉了 8 条动态分配的"最近工程"项，故 json 为 132 条）。脱敏后发布：原文含作者本机的最近打开路径。 |
+
 | `tools/crossings.py` | 几何检查：走线交叉数、走线压到无关引脚（压上 Proteus 会当成真连接）。 |
 | `tools/netcheck.py` | 网表断言（**注意：断言表是为某个万年历工程写死的**，换工程要看内容不看结论）。 |
 | `tools/lcdlog.py` / `tools/lcdgpio.py` | 不截图，直接从 GPIO 事件流还原 LCD 文本（抢不到前台时的备选通道）。 |

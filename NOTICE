@@ -1,0 +1,50 @@
+# NOTICE — 哪些是自己的，哪些是别人的补丁
+
+## 自有代码（MIT，见 LICENSE）
+
+| 文件 | 说明 |
+|---|---|
+| `python/papi.py` | 包装层。上游库在本机有两处不可用（`run_for()` 只有第一次能收敛；`log()/gpio_events()` 依赖弹不出来的 QPopup），本文件用「到达目标 + 秒数不再变化 → 主动 pause」和「置前 + Ctrl+A/Ctrl+C」两条替代路径绕开，并提供 `cmd()` 直发原生菜单命令。2026-11-14 追加引擎存活守卫。 |
+| `tools/shot_lcd.py` | 同一会话内增量推进到多个时刻、整窗截图、按橄榄绿面板自动定位并裁剪 LCD。2026-11-14 追加 `finally close` 与自动重试。 |
+| `tools/checkhex.py` | Intel HEX 向量表断言（SP 必须落在 SRAM、RESET 必须是 Thumb 地址且在 Flash 内）。 |
+| `tools/crossings.py` | 几何检查：走线交叉数、走线压到无关引脚（压上 Proteus 会当成真连接）。 |
+| `tools/netcheck.py` | 网表断言（**注意：断言表是为某个万年历工程写死的**，换工程要看内容不看结论）。 |
+| `tools/lcdlog.py` / `tools/lcdgpio.py` | 不截图，直接从 GPIO 事件流还原 LCD 文本（抢不到前台时的备选通道）。 |
+| `tools/build_cal.ps1` | armcc → armlink → fromelf 一键出 hex，并调 `checkhex.py` 断言。 |
+| `SKILL.md` / `docs/*` | 经验与边界。 |
+
+## 上游代码（proteus-automatic-api 0.2.0，MIT）
+
+`python/` 下这 7 个文件来自上游，**已打补丁**：
+
+- `component_codec.py`
+- `wire_codec.py`（与上游一致，无补丁）
+- `proteus_session.py`
+- `proteus_native.py`
+- `proteus_project.py`
+- `proteus_automatic_api.py`
+- `simulation.py`
+
+逐字节差异见 `patches/`。补丁清单：
+
+### `patches/proteus_session.patch`
+
+1. **SDF 端点补 `GT`** —— 本机 Proteus 8.16 给"网络标签"端点输出的类型是 `GT`，上游只认 `LBL/PT/PR/IT/OT/BT`，缺它时 `export_netlist()` 在文件已经写完之后抛 `Unsupported SDF endpoint`。
+2. **`wShowWindow` 0 → 1** —— 上游用 `SW_HIDE` 启动，但 `_ready()` 又要求窗口 `visible`，自相矛盾，永远等不到 ready。
+3. **自动点掉"是否恢复自动保存的工程?"** —— 强杀 Proteus 后必弹，弹了整条链路就卡死；这里一律点「否」。
+4. **`MENU_ALIASES` 中文汉化菜单映射** —— 本机是汉化版，`Tool/Netlist Compiler` 实际叫 `工具(T)/编译网络表`。找不到英文时自动回退中文。
+5. **网表临时文件改成 `.keep` 而不是 `unlink`** —— 避免 Proteus 还握着文件句柄时删除失败。
+
+### `patches/component_codec.patch`
+
+**器件记录的写入格式修正**（这是最有价值的一处）。上游把完整属性体当成"显示串"内联，并跳过属性体，导致 `props_len` 与实际显示串等长；Proteus 8.16 仍按 `props_len` 去读属性体，于是整条记录错位，报：
+
+```
+Device '<控制字符>' used but not in library.
+```
+
+修法：第 4 条文本记录只写"显示串"（模板里的 `display_text`），完整属性体另起 `props_len + body` 存放，且**属性体一律写出**。已用真实器件的原始记录逐字节比对确认。
+
+## 不分发的东西
+
+Proteus 软件本体、器件库（`LIBRARY`）、Keil/armcc、任何 `.hex` 以外的商业二进制，本项目都不包含。

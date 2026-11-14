@@ -1,0 +1,36 @@
+MIT License
+
+Copyright (c) 2026 mxk
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Third-party notice
+
+`python/component_codec.py`, `python/wire_codec.py`, `python/proteus_session.py`,
+`python/proteus_native.py`, `python/proteus_project.py`,
+`python/proteus_automatic_api.py` and `python/simulation.py` are derived from
+proteus-automatic-api 0.2.0, which is distributed under the MIT License:
+
+    MIT License
+    Copyright (c) 2026 proteus-automatic-api contributors
+
+Those files have been modified on this machine to work with a Chinese-localized
+Proteus 8.16 SP3. The exact deltas against upstream 0.2.0 are in `patches/`.

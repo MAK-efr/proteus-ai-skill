@@ -1,0 +1,82 @@
+--- proteus_session.py.orig-20261110	2026-11-10 17:42:37.955285300 +0800
++++ proteus_session.py	2026-11-13 12:22:49.037951800 +0800
+@@ -81,7 +81,10 @@
+                 for _ in range(pin_count):
+                     endpoint = fields(lines[pos])
+                     pos += 1
+-                    if len(endpoint) == 2 and endpoint[1] in {"LBL", "PT", "PR", "IT", "OT", "BT"}:
++                    # PATCH 2026-11-10: 补 GT —— Proteus 8.16 给"网络标签"端点
++                    # 输出的类型是 GT（此前只认 LBL/PT/PR/IT/OT/BT），缺它时
++                    # export_netlist 会在文件写完之后抛 Unsupported SDF endpoint。
++                    if len(endpoint) == 2 and endpoint[1] in {"LBL", "PT", "PR", "IT", "OT", "BT", "GT"}:
+                         ref, kind = endpoint
+                         terminals.append(dict(name=ref, kind=kind))
+                         continue
+@@ -109,7 +112,7 @@
+             raise ValueError("Expected a .pdsprj project and PDS.EXE")
+         startup = subprocess.STARTUPINFO()
+         startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+-        startup.wShowWindow = 0
++        startup.wShowWindow = 1  # NETPATCH: 原值 0(SW_HIDE)，与 _ready() 要求 visible 矛盾，改为 SW_SHOWNORMAL
+         self.process = subprocess.Popen([str(executable), str(self.project)], startupinfo=startup)
+         self.pid = self.process.pid
+         def launched():
+@@ -118,6 +121,16 @@
+                     native.u.PostMessageW(row["hwnd"], 0x10, 0, 0)  # dismiss; do not submit a report
+                 if row["title"] == "Fatal Error" or any("Bad object record" in x["title"] for x in row["children"]):
+                     raise RuntimeError(f"Proteus rejected the project: {json.dumps(row)}")
++                # 强杀过 Proteus 后会出现"是否恢复自动保存的工程?"模态框，会卡死整个启动流程。
++                # 我们总是从原始工程的新副本启动，恢复出来的半成品只会污染实验，一律点"否"。
++                if row["cls"] == "#32770":
++                    kids = row.get("children") or []
++                    blob = " ".join(str(x.get("title") or "") for x in kids).lower()
++                    if "autosave" in blob or "自动保存" in blob:
++                        for kid in kids:
++                            if kid.get("cls") == "Button" and kid.get("control_id") == 209:  # IDNO
++                                native.u.PostMessageW(kid["hwnd"], 0xF5, 0, 0)
++                                break
+             return self._ready()
+         try:
+             self._wait(launched, timeout=45)
+@@ -146,10 +159,22 @@
+                 and row["title"].startswith(self.project.stem + " - ") and row["enabled"]]
+         return rows[0] if len(rows) == 1 else None
+ 
++    # NETPATCH: 中文汉化版菜单映射（英文原始路径 -> 本机汉化路径）。找不到英文时自动回退中文。
++    MENU_ALIASES = {
++        "Tool/Netlist Compiler": "工具(T)/编译网络表",
++        "Tool/ASCII Data Import Tool": "工具(T)/ASCII数据输入工具",
++        "File/Save Project": "文件(F)/保存工程(S)",
++        "File/Exit Application": "文件(F)/退出程序(x)",
++    }
++
+     def menu(self, path):
+         window = self._wait(self._ready)
++        wanted = {path}
++        alt = self.MENU_ALIASES.get(path)
++        if alt:
++            wanted.add(alt)
+         found = [item for item in native.menus(native.u.GetMenu(window["hwnd"]))
+-                 if item["path"] == path and item["enabled"]]
++                 if item["path"] in wanted and item["enabled"]]
+         if len(found) != 1:
+             raise ValueError(f"Missing or disabled menu: {path}")
+         if not native.u.PostMessageW(window["hwnd"], 0x111, found[0]["command_id"], 0):
+@@ -202,7 +227,7 @@
+     def netlist(self):
+         temporary = self.project.parent / f"api-{uuid.uuid4().hex}.sdf"
+         result = self.export_netlist(temporary)
+-        temporary.unlink()
++        temporary.replace(temporary.with_suffix('.keep'))
+         return result
+ 
+     def set_properties(self, ref, **properties):
+@@ -232,7 +257,7 @@
+                     raise RuntimeError(f"ADI read-back mismatch: {ref}.{key}: {observed!r}")
+             return actual
+         finally:
+-            path.unlink()
++            path.replace(path.with_suffix('.keep'))
+ 
+     def save(self):
+         before = self.project.stat().st_mtime_ns

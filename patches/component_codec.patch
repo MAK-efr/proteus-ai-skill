@@ -1,0 +1,43 @@
+--- component_codec.py.orig-20261110b	2026-11-10 19:05:08.262193000 +0800
++++ component_codec.py	2026-11-10 19:05:47.725239400 +0800
+@@ -70,11 +70,13 @@
+ def _render_component(template, ref, value, x, y, index):
+     dx, dy = x - template["x"], y - template["y"]
+     actual_properties = _value_properties(template["properties"], value)
+-    # Proteus 8.16 does not consume a separate property body of 50 bytes or
+-    # fewer. Store those strings in the text record, retaining its draw flags.
+-    visible_properties = actual_properties if ((len(actual_properties) <= 50
+-                                                or template.get("show_properties", True))
+-                                               and len(actual_properties.encode("ascii")) < 255) else ""
++    # PATCH 2026-11-10: 第 4 条文本记录必须写"显示串"（模板原有的 display_text，
++    # 库导入器件为空），完整属性体另起 props_len + body 存放。旧实现把完整属性当
++    # 显示串内联并跳过属性体，导致 props_len 与显示串等长 → Proteus 8.16 仍按
++    # props_len 读取属性体，整条记录错位，报 "Device '<控制字符>' used but not in
++    # library"。已用 led51 真实记录逐字节比对确认。
++    display_properties = template.get("display_properties") or ""
++    visible_properties = _value_properties(display_properties, value) if display_properties else ""
+     values = [ref, value, template["device"], visible_properties]
+     result = bytearray([template.get("record_tag", 0)])
+     for text, tail in zip(values, template["text_tails"]):
+@@ -85,8 +87,9 @@
+         struct.pack_into("<ii", tail, 0, old_x + dx, old_y + dy)
+         result += b"\xff" + _short(text) + tail
+     result += struct.pack("<I", len(actual_properties))
+-    if visible_properties != actual_properties:
+-        result += actual_properties.encode("ascii")
++    # PATCH 2026-11-10: 属性体一律写出。Proteus 读取时总是按 props_len 吞掉这么
++    # 多字节，缺体就会把后面的引脚数/符号名当属性吃掉，整条记录开始错位。
++    result += actual_properties.encode("ascii")
+     result += struct.pack("<H", len(template["pins"])) + _short(template["symbol"])
+     instance = bytearray(template["instance"])
+     struct.pack_into("<ii", instance, 0, x, y)
+@@ -139,6 +142,9 @@
+             "record_tag": project._dsn[item['dsn_record_start'] - 1],
+             "text_tails": tails, "instance": instance, "pins": entity["pins"],
+             "x": x, "y": y, "properties": item["fields"][3]["text"],
++            # PATCH 2026-11-10: 保留原理图上真正绘制的属性串（可能比完整属性短，
++            # 例如 RES 为 2 行、完整属性为 4 行）。
++            "display_properties": item["fields"][3].get("display_text", ""),
+             "package": item["cdb"]["package"], "pin_offsets": offsets, "pin_directions": directions,
+             "entity_auxiliary": entity["auxiliary"],
+             "show_properties": bool(item["fields"][3].get("display_text", item["fields"][3]["text"]))}

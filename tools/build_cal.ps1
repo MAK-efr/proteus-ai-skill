@@ -1,61 +1,65 @@
-# build_cal.ps1 <src.c> <out_stem>  -- PowerShell port of build_cal.sh
-# Keil ARMCC build + vector-table guard.
-# NOTE: no -g / no --debug.  With either flag armlink puts Reset_Handler's code
+# build_cal.ps1 - Keil ARMCC build for Cortex-M3 + vector-table guard.
+#
+# NOTE: no -g / no --debug. With either flag armlink puts Reset_Handler's code
 #       at 0x08000000 and buries the RESET vector section elsewhere, so the core
 #       boots with SP/PC = garbage and the chip silently locks up.
+#
+# Usage:
+#   .\build_cal.ps1 -Src main.c -Out Objects/app -Scatter fw.sct -Startup Objects/startup.o
+#
+# Everything machine-specific is a parameter or an env var, nothing is hardcoded:
+#   -ArmccDir   directory holding armcc.exe / armlink.exe / fromelf.exe
+#               (default: $env:ARMCC_DIR, else Keil ARMCC default install)
+#   -Python     interpreter used for the vector-table guard (default: python on PATH)
 param(
     [Parameter(Mandatory=$true)][string]$Src,
-    [Parameter(Mandatory=$true)][string]$Out
+    [Parameter(Mandatory=$true)][string]$Out,
+    [Parameter(Mandatory=$true)][string]$Scatter,
+    [Parameter(Mandatory=$true)][string]$Startup,
+    [string]$ArmccDir = $env:ARMCC_DIR,
+    [string[]]$Include = @(),
+    [string]$Python = "python"
 )
 $ErrorActionPreference = "Stop"
-$FW  = "C:\l130sim\lcd"
-$CC  = "D:\keli\ARM\ARMCC\bin\armcc.exe"
-$LD  = "D:\keli\ARM\ARMCC\bin\armlink.exe"
-$ELF = "D:\keli\ARM\ARMCC\bin\fromelf.exe"
-$PY  = "C:\Users\32500\.workbuddy\binaries\python\envs\proteus\Scripts\python.exe"
 
-foreach ($exe in @($CC, $LD, $ELF)) { if (-not (Test-Path $exe)) { throw "missing $exe" } }
-Set-Location $FW
+if (-not $ArmccDir) {
+    $cand = @(
+        "C:\Keil_v5\ARM\ARMCC\bin",
+        "C:\Keil\ARM\ARMCC\bin",
+        "D:\keli\ARM\ARMCC\bin"
+    ) | Where-Object { Test-Path (Join-Path $_ "armcc.exe") } | Select-Object -First 1
+    if (-not $cand) { throw "armcc.exe not found. Pass -ArmccDir or set ARMCC_DIR." }
+    $ArmccDir = $cand
+}
 
-& $CC --c99 -c --cpu Cortex-M3 -O1 -D__MICROLIB "-I$FW" $Src -o "$Out.o"
+$CC  = Join-Path $ArmccDir "armcc.exe"
+$LD  = Join-Path $ArmccDir "armlink.exe"
+$ELF = Join-Path $ArmccDir "fromelf.exe"
+foreach ($exe in @($CC, $LD, $ELF)) {
+    if (-not (Test-Path $exe)) { throw "missing $exe" }
+}
+foreach ($p in @($Scatter, $Startup)) {
+    if (-not (Test-Path $p)) { throw "missing $p" }
+}
+
+$IncArgs = @()
+foreach ($i in $Include) { $IncArgs += "-I$i" }
+if ($Include.Count -eq 0) { $IncArgs += "-I." }
+
+& $CC --c99 -c --cpu Cortex-M3 -O1 -D__MICROLIB @IncArgs $Src -o "$Out.o"
 if ($LASTEXITCODE -ne 0) { throw "armcc failed ($LASTEXITCODE)" }
 
 & $LD --entry Reset_Handler --library_type=microlib `
-      --scatter=C:/l130sim/fw2/fw2.sct `
-      "$Out.o" C:/l130sim/fw2/startup.o -o "$Out.axf"
+      "--scatter=$Scatter" "$Out.o" $Startup -o "$Out.axf"
 if ($LASTEXITCODE -ne 0) { throw "armlink failed ($LASTEXITCODE)" }
 
 & $ELF --i32combined -o "$Out.hex" "$Out.axf"
 if ($LASTEXITCODE -ne 0) { throw "fromelf failed ($LASTEXITCODE)" }
 
-# --- vector table guard (same checks as build_cal.sh) ---
-$chk = @'
-import sys
-mem, base = {}, 0
-for ln in open(sys.argv[1]):
-    ln = ln.strip()
-    if not ln.startswith(':'):
-        continue
-    n = int(ln[1:3], 16); a = int(ln[3:7], 16); t = int(ln[7:9], 16)
-    d = bytes.fromhex(ln[9:9 + 2 * n])
-    if t == 0:
-        for i, b in enumerate(d):
-            mem[base + a + i] = b
-    elif t == 4:
-        base = int.from_bytes(d, 'big') << 16
-    elif t == 2:
-        base = int.from_bytes(d, 'big') << 4
-w = lambda a: int.from_bytes(bytes(mem.get(a + i, 0xFF) for i in range(4)), 'little')
-sp, pc = w(0x08000000), w(0x08000004)
-lo, hi = min(mem), max(mem)
-print("hex %08X..%08X (%d bytes)  SP=%08X  RESET=%08X" % (lo, hi, len(mem), sp, pc))
-assert 0x20000000 <= sp <= 0x20005000, "bad initial SP"
-assert 0x08000000 <= pc < 0x08008000 and pc & 1, "bad reset vector (not Thumb code in flash)"
-print("vector table OK")
-'@
-$tmp = Join-Path $env:TEMP "vecguard.py"
-Set-Content -Path $tmp -Value $chk -Encoding ascii
-& $PY $tmp "$Out.hex"
+# --- vector table guard (same checks as tools/checkhex.py) ---
+$chk = Join-Path $PSScriptRoot "checkhex.py"
+if (-not (Test-Path $chk)) { throw "missing $chk" }
+& $Python $chk "$Out.hex"
 if ($LASTEXITCODE -ne 0) { throw "vector table check FAILED" }
 
 Get-Item "$Out.hex" | Select-Object Name, Length, LastWriteTime | Format-List

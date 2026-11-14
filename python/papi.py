@@ -27,10 +27,17 @@ import time
 from ctypes import wintypes as w
 from pathlib import Path
 
-SP = r"C:\Users\32500\.workbuddy\binaries\python\envs\proteus\Lib\site-packages"
 import sys
-if SP not in sys.path:
-    sys.path.insert(0, SP)
+
+# 依赖模块目录：默认就用本文件所在目录（仓库自带全部模块），
+# 需要覆盖时设 PROTEUS_PYSITE。详见 proteus_env.py 的说明。
+try:
+    from proteus_env import pysite as _pysite
+    SP = _pysite()
+except ImportError:                      # 单文件拷出去用的情况
+    SP = str(Path(__file__).resolve().parent)
+    if SP not in sys.path:
+        sys.path.insert(0, SP)
 
 import proteus_native as native
 from proteus_session import Session
@@ -126,8 +133,14 @@ def _ctrl(vk):
 class Sim:
     """Session + Simulation 的合并门面，带本机实测过的绕坑实现。"""
 
-    def __init__(self, project, firmware=None, executable=r"D:\Proteus\BIN\PDS.EXE",
+    def __init__(self, project, firmware=None, executable=None,
                  auto_open=True):
+        if executable is None:
+            try:
+                from proteus_env import pds_exe
+                executable = pds_exe()
+            except ImportError:
+                executable = r"D:\Proteus\BIN\PDS.EXE"
         self.session = Session(project, executable) if auto_open else None
         self.sim = Simulation(self.session)
         if firmware:

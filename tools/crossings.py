@@ -12,23 +12,32 @@
 * 交叉：两条线段严格相交于内部点（共享端点不算）。水平/垂直都算。
 * 压脚：走线穿过某引脚坐标，而该引脚不属于这条线连接的两个端点 => 视为短路隐患。
 """
+import os
 import sys
+from pathlib import Path
 
-sys.path.insert(0, r"C:\Users\32500\.workbuddy\binaries\python\envs\proteus\Lib\site-packages")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "python"))
+from proteus_env import add_self_to_path, library_dir, default_project
+
+add_self_to_path()
 import device_library
 
 _Orig = device_library.Library
+_LIB = library_dir()
 
 
 class _L(_Orig):
-    def __init__(self, directory=r"D:\Proteus\LIBRARY"):
+    def __init__(self, directory=_LIB):
         super().__init__(directory)
 
 
 device_library.Library = _L
 from component_codec import Circuit
 
-PRJ = sys.argv[1] if len(sys.argv) > 1 else r"C:\l130sim\proj_adc\spi_adc.pdsprj"
+PRJ = sys.argv[1] if len(sys.argv) > 1 else default_project()
+if not PRJ:
+    raise SystemExit("用法: crossings.py <project.pdsprj>   （或设环境变量 PROTEUS_PRJ）")
+
 c = Circuit.open(PRJ)
 
 pin_pos = {}

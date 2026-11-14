@@ -8,17 +8,21 @@ Proteus 的 Simulation Log 会逐脚记录 `[GPIO] drive PIO2.x = v`。按序号
 重建 16x2 DDRAM 文本 —— 这样锁屏 / 无桌面 / 远程会话里也能机器判读显示内容。
 
 用法:
-  lcdlog.py C:/l130sim/lcd/calendar.pdsprj C:/l130sim/lcd/Objects/calendar.hex 2.2 6.2
+  lcdlog.py D:/demo/lcd/cal.pdsprj D:/demo/lcd/Objects/cal.hex 2.2 6.2
 """
 import os
 import re
 import sys
 import time
 import subprocess
+from pathlib import Path
 
-sys.path.insert(0, r"C:\l130sim\gh")
-sys.path.insert(0, r"C:\Users\32500\.workbuddy\binaries\python\envs\proteus\Lib\site-packages")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "python"))
+from proteus_env import add_self_to_path
+
+add_self_to_path()
 import papi
+
 
 REC = re.compile(r"@\[GPIO\] drive PIO2\.(\w) = (\d)")
 
@@ -88,7 +92,10 @@ def decode(lines):
 
 
 def main():
+    if len(sys.argv) < 4:
+        raise SystemExit("用法: lcdlog.py <project.pdsprj> <firmware.hex> <seconds> [more...] [--csv]")
     prj, hexfile, secs = sys.argv[1], sys.argv[2], float(sys.argv[3])
+
     subprocess.run(["taskkill", "/F", "/IM", "PDS.EXE"], capture_output=True)
     subprocess.run(["taskkill", "/F", "/IM", "UV4.exe"], capture_output=True)
     time.sleep(2)

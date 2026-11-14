@@ -105,7 +105,14 @@ def parse_sdf(text):
 class Session:
     """Owns one Proteus process. Pass a disposable project copy, not an original."""
 
-    def __init__(self, project, executable=r"D:\Proteus\BIN\PDS.EXE"):
+    def __init__(self, project, executable=None):
+        if executable is None:
+            try:
+                from proteus_env import pds_exe
+                executable = pds_exe()
+            except ImportError:
+                import os
+                executable = os.environ.get("PROTEUS_PDS", r"D:\Proteus\BIN\PDS.EXE")
         self.project = Path(project).resolve(strict=True)
         executable = Path(executable).resolve(strict=True)
         if self.project.suffix.lower() != ".pdsprj" or executable.name.upper() != "PDS.EXE":

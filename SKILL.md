@@ -106,10 +106,24 @@ Proteus 晶振模型对 HSE 起振不可靠，固件若死等 HSERDY 会永久�
 
 ## 环境
 
-- Python：`C:\Users\32500\.workbuddy\binaries\python\envs\proteus\Scripts\python.exe`
-- **已装 Pillow 13.0.0**（2026-11-13 实测 `from PIL import Image` 可用，`crop.py` / `shot3.py` 都跑通）。旧记录里"该 venv 不含 PIL、截图要换 default venv"**已作废**。
-- 自写脚本仍要 `sys.path.insert(0, r"C:\l130sim\gh")` 和 `...\proteus\Lib\site-packages`，才能 import `papi` / `component_codec`
-- `D:\Proteus\BIN\PDS.EXE` 由 `Session` 自动拉起，不要自己 spawn
+- Python ≥ 3.10，Windows。截图类工具另需 **Pillow**（`pip install pillow`）；纯文本判读不需要。
+- **仓库自带全部 15 个 proteus 模块**，`import papi` / `import component_codec` 只要把 `python/`
+  放进 `sys.path` 即可，不需要装任何 pip 包、不需要往 site-packages 拷文件。
+- 写脚本时的标准开头（不要写死任何绝对路径）：
+
+  ```python
+  import sys
+  from pathlib import Path
+  sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "python"))
+  from proteus_env import add_self_to_path
+  add_self_to_path()
+  import papi
+  ```
+
+- 路径解析统一走 `python/proteus_env.py`：`pds_exe()` / `library_dir()` / `default_project()`。
+  分别对应环境变量 `PROTEUS_PDS` / `PROTEUS_LIBRARY` / `PROTEUS_PRJ`，不设则自动探测常见安装位置。
+- `PDS.EXE` 由 `Session` 自动拉起，不要自己 spawn
+
 
 ## 验证契约（交付前必须分清）
 
@@ -176,7 +190,7 @@ METHOD(GEAR) MAXORD PIVREL PIVTOL RSHUNT(1e12) BYPASS BADMOS3 TRYTOCOMPACT TEMP 
 - **Proteus 每次启动都会建一个 `api-*.sdf` 再立刻删掉** → 一次实验至少吃 1 次配额
 - 一个 turn 内最多跑约 4 次 Proteus
 - 对策：① 批量实验写成**一个会话内换固件**（`sim.stop()` → `reset()` → `set_firmware()` → `save()` → `start()`），
-  见 `gh_multi.py`；② 每次在 `C:\l130sim\run\<tag>` **全新空目录**启动，别复用旧目录；
+  见 `tools/` 里批量实验的写法；② 每次在**全新空目录**（如 `%TEMP%\proteus-<tag>`）启动，别复用旧目录；
   ③ 结束用 `session.process.kill()`，**不要**走 `close_session()` 的 File/Exit（会触发 Proteus 批量清理）
 - 给目录加 `icacls /deny user:(DC)` **无效**，Proteus 照样删得掉，别浪费时间去试
 
@@ -255,12 +269,12 @@ METHOD(GEAR) MAXORD PIVREL PIVTOL RSHUNT(1e12) BYPASS BADMOS3 TRYTOCOMPACT TEMP 
 
 ## ★★★ 自动化接口层（2026-11-13 逆向实测）：能用的、不能用的、怎么绕
 
-完整能力地图见工程内 `C:\l130sim\gh\api_probe\PROTEUS_API_MAP.md`，
-可用层封装见 `C:\l130sim\gh\papi.py`（`open_sim()` 一行打开，7 项验收脚本
-`api_papi_check.py` 全过）。
+可用层封装见本仓库 `python/papi.py`（`papi.Sim` 一行打开，`Sim.run_exact()` 处理下文的
+"冻住"病理，`Sim.read_log()` 绕开不弹的右键菜单）。菜单命令表用 `Sim.cmd(id)` 直接发，
+库没包装的能力都能调。
 
 ### 版本门槛（先查这一个，再看别的）
-`Simulation` 读状态栏靠只读 WINCORE 内存，要求 `D:\Proteus\BIN\WINCORE.DLL` 的
+`Simulation` 读状态栏靠只读 WINCORE 内存，要求 `<Proteus 安装目录>\BIN\WINCORE.DLL` 的
 sha256 == `944013e93f0d31addbbce797d6eb3746bf06c7497c0d04cb77955fc0acd569bb`。
 不匹配 → `status_text`/`simulation_seconds`/`run_for` 全部退化为 `NotImplementedError`，
 只剩菜单状态可用。先算哈希，再谈其它。

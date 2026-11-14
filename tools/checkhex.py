@@ -67,6 +67,9 @@ def check(path):
 
 
 if __name__ == '__main__':
-    paths = sys.argv[1:] or [r"C:\l130sim\lcd\Objects\calendar.hex"]
+    paths = sys.argv[1:]
+    if not paths:
+        raise SystemExit("用法: checkhex.py <file.hex> [more.hex ...]")
     results = [check(p) for p in paths]
     sys.exit(0 if results and all(results) else 1)
+

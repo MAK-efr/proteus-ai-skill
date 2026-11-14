@@ -5,7 +5,7 @@
 橄榄绿面板（RGB≈(150,175,0)）后裁剪放大，因此不依赖窗口是否最大化。
 
 用法示例:
-  shot_lcd.py C:/l130sim/lcd/cal_rate.pdsprj C:/l130sim/lcd/stirq.hex C:/l130sim/lcd/out_x 4 12
+  shot_lcd.py D:/demo/lcd/cal.pdsprj D:/demo/lcd/Objects/cal.hex D:/demo/out 4 12
 """
 import os
 import sys
@@ -13,9 +13,13 @@ import time
 import glob
 import ctypes
 import subprocess
+from pathlib import Path
 
-sys.path.insert(0, r"C:\l130sim\gh")
-sys.path.insert(0, r"C:\Users\32500\.workbuddy\binaries\python\envs\proteus\Lib\site-packages")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "python"))
+from proteus_env import add_self_to_path, need_pil
+
+add_self_to_path()
+need_pil()
 from PIL import Image
 import papi
 
@@ -105,7 +109,10 @@ def find_lcd(img):
 
 
 def main():
+    if len(sys.argv) < 4:
+        raise SystemExit("用法: shot_lcd.py <project.pdsprj> <firmware.hex> <outdir> [seconds...]")
     prj, hexfile, outdir = sys.argv[1], sys.argv[2], sys.argv[3]
+
     times = [float(t) for t in sys.argv[4:]]
     os.makedirs(outdir, exist_ok=True)
 

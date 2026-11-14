@@ -41,28 +41,29 @@
 # 1) 建环境
 py -3.11 -m venv .venv
 .\.venv\Scripts\activate
-pip install pillow
+pip install pillow          # 只有截图类工具需要；纯文本判读不需要
 
-# 2) 把 python/ 里的模块放进 site-packages（这些文件是"上游包 + 本机补丁"，见第六节）
-Copy-Item .\python\*.py .\.venv\Lib\site-packages\
-
-# 3) 自检
-python -c "import papi; print('ok')"
+# 2) 自检：仓库自带全部依赖模块，不需要往 site-packages 里拷任何东西
+$env:PYTHONPATH = "$PWD\python"
+python -c "import papi, component_codec; print('ok')"
 ```
 
-如果你的 site-packages 不在默认位置，用环境变量指定，`papi.py` 会优先读它：
+**路径全部自动探测，不需要手改源码。** 三个环境变量只在探测失败时才要设：
 
-```powershell
-$env:PROTEUS_PYSITE = "D:\py\venv\Lib\site-packages"
-```
-
-**必须按自己机器改的路径**（本项目是在一台固定机器上长出来的，路径写死过）：
-
-| 常量 | 位置 | 说明 |
+| 变量 | 作用 | 不设时的行为 |
 |---|---|---|
-| `PDS.EXE` | `python/proteus_session.py` | 默认 `D:\Proteus\BIN\PDS.EXE` |
-| 器件库 `LIBRARY` | `python/component_codec.py` / `proteus_project.py` | 默认 `D:\Proteus\LIBRARY` |
-| 启动模板工程 | `python/proteus_session.py` | 默认官方 `Rescap.pdsprj` |
+| `PROTEUS_PDS` | `PDS.EXE` 全路径 | 依次探测 `D:\Proteus\BIN`、`C:\Program Files (x86)\Labcenter Electronics\Proteus 8 Professional\BIN` 等 |
+| `PROTEUS_LIBRARY` | 器件库 `LIBRARY` 目录 | 依次探测 `D:\Proteus\LIBRARY`、Proteus 标准安装目录等 |
+| `PROTEUS_PRJ` | 工具脚本的默认工程路径 | 不设则必须命令行传参 |
+
+> ⚠️ 上游包的 `device_library.Library` 默认值是 `C:\ProgramData\program\LIBRARY`，
+> **这个路径在正常安装里根本不存在**（是作者机器上的残留）。本项目用 `proteus_env.library_dir()`
+> 绕开了它，但如果你直接调上游 `Library()` 而不传参数，就会踩这个坑。
+
+`PROTEUS_PYSITE` 仅在一种情况下需要设：你想用别的目录里的模块覆盖本仓库自带的版本。
+本仓库的 `proteus_session.py` / `component_codec.py` 是**打过补丁**的（见第六节），
+设错方向会让补丁静默失效。
+
 
 ---
 

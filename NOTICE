@@ -4,7 +4,8 @@
 
 | 文件 | 说明 |
 |---|---|
-| `python/papi.py` | 包装层。上游库在本机有两处不可用（`run_for()` 只有第一次能收敛；`log()/gpio_events()` 依赖弹不出来的 QPopup），本文件用「到达目标 + 秒数不再变化 → 主动 pause」和「置前 + Ctrl+A/Ctrl+C」两条替代路径绕开，并提供 `cmd()` 直发原生菜单命令。2026-11-14 追加引擎存活守卫。 |
+| `python/papi.py` | 包装层。上游库在本机有两处不可用（`run_for()` 只有第一次能收敛；`log()/gpio_events()` 依赖弹不出来的 QPopup），本文件用「到达目标 + 秒数不再变化 → 主动 pause」和「置前 + Ctrl+A/Ctrl+C」两条替代路径绕开，并提供 `cmd()` 直发原生菜单命令。2026-11-14 追加引擎存活守卫、`controls/press/release/set_switch` 封装、`graphs/add_traces/export_csv` 封装。 |
+| `python/proteus_env.py` | 路径解析层。上游把 `PDS.EXE` 和器件库默认值写死成作者机器上的路径（后者的默认值 `C:\ProgramData\program\LIBRARY` 在正常安装里根本不存在）。本文件改成环境变量优先 + 常见安装位置探测，让仓库可以跨机器直接用。 |
 | `tools/shot_lcd.py` | 同一会话内增量推进到多个时刻、整窗截图、按橄榄绿面板自动定位并裁剪 LCD。2026-11-14 追加 `finally close` 与自动重试。 |
 | `tools/checkhex.py` | Intel HEX 向量表断言（SP 必须落在 SRAM、RESET 必须是 Thumb 地址且在 Flash 内）。 |
 | `tools/crossings.py` | 几何检查：走线交叉数、走线压到无关引脚（压上 Proteus 会当成真连接）。 |
@@ -15,15 +16,23 @@
 
 ## 上游代码（proteus-automatic-api 0.2.0，MIT）
 
-`python/` 下这 7 个文件来自上游，**已打补丁**：
+`python/` 下这 15 个文件来自上游（完整包，缺一个就 `ImportError`），其中标 ★ 的**已打补丁**：
 
-- `component_codec.py`
+- ★ `component_codec.py`
+- ★ `proteus_session.py`
 - `wire_codec.py`（与上游一致，无补丁）
-- `proteus_session.py`
 - `proteus_native.py`
 - `proteus_project.py`
 - `proteus_automatic_api.py`
 - `simulation.py`
+- `device_library.py`
+- `measurements.py`
+- `net_edit.py`
+- `net_objects.py`
+- `pin_geometry.py`
+- `interactive_native.py`
+- `clone_research.py`
+- `connectivity_research.py`
 
 逐字节差异见 `patches/`。补丁清单：
 
@@ -34,6 +43,8 @@
 3. **自动点掉"是否恢复自动保存的工程?"** —— 强杀 Proteus 后必弹，弹了整条链路就卡死；这里一律点「否」。
 4. **`MENU_ALIASES` 中文汉化菜单映射** —— 本机是汉化版，`Tool/Netlist Compiler` 实际叫 `工具(T)/编译网络表`。找不到英文时自动回退中文。
 5. **网表临时文件改成 `.keep` 而不是 `unlink`** —— 避免 Proteus 还握着文件句柄时删除失败。
+6. **`Session.__init__` 的 `executable` 默认值改为 `None` → 由 `proteus_env.pds_exe()` 解析** —— 上游写死 `D:\Proteus\BIN\PDS.EXE`，换机器即 `FileNotFoundError`。
+
 
 ### `patches/component_codec.patch`
 

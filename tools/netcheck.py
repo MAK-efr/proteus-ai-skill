@@ -11,11 +11,20 @@ Wiring under test (built by build_final.py):
 
 Exit code: 0 = all checks pass, 1 = at least one failure.
 """
+import os
 import sys
-sys.path.insert(0, r"C:\Users\32500\.workbuddy\binaries\python\envs\proteus\Lib\site-packages")
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "python"))
+from proteus_env import add_self_to_path, default_project
+
+add_self_to_path()
 from component_codec import Circuit
 
-PRJ = sys.argv[1] if len(sys.argv) > 1 else r"C:\l130sim\lcd\calendar.pdsprj"
+PRJ = sys.argv[1] if len(sys.argv) > 1 else default_project()
+if not PRJ:
+    raise SystemExit("用法: netcheck.py <project.pdsprj>   （或设环境变量 PROTEUS_PRJ）")
+
 c = Circuit.open(PRJ)
 
 failures = []

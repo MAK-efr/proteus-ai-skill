@@ -10,10 +10,14 @@ gh_tx 的进程堆内存提取，拿到的是一串 (port, pin, value, seconds) 
 import sys
 import time
 import subprocess
+from pathlib import Path
 
-sys.path.insert(0, r"C:\l130sim\gh")
-sys.path.insert(0, r"C:\Users\32500\.workbuddy\binaries\python\envs\proteus\Lib\site-packages")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "python"))
+from proteus_env import add_self_to_path
+
+add_self_to_path()
 import papi
+
 
 
 def replay(events):
@@ -70,7 +74,10 @@ def replay(events):
 
 
 def main():
+    if len(sys.argv) < 3:
+        raise SystemExit("用法: lcdgpio.py <project.pdsprj> <firmware.hex> [seconds...]")
     prj, hexf = sys.argv[1], sys.argv[2]
+
     times = [float(x) for x in sys.argv[3:]] or [3.0]
     subprocess.run(["taskkill", "/F", "/IM", "PDS.EXE"], capture_output=True)
     time.sleep(2)

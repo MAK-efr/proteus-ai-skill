@@ -19,18 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Third-party notice
-
-`python/component_codec.py`, `python/wire_codec.py`, `python/proteus_session.py`,
-`python/proteus_native.py`, `python/proteus_project.py`,
-`python/proteus_automatic_api.py` and `python/simulation.py` are derived from
-proteus-automatic-api 0.2.0, which is distributed under the MIT License:
-
-    MIT License
-    Copyright (c) 2026 proteus-automatic-api contributors
-
-Those files have been modified on this machine to work with a Chinese-localized
-Proteus 8.16 SP3. The exact deltas against upstream 0.2.0 are in `patches/`.

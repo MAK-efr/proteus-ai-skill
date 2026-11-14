@@ -1,5 +1,20 @@
 # NOTICE — 哪些是自己的，哪些是别人的补丁
 
+## 许可证
+
+本项目自有代码按 **MIT** 发布，全文见 `LICENSE`。
+
+`python/` 下的 15 个模块来自 **proteus-automatic-api 0.2.0**，同样以 **MIT** 分发：
+
+```
+MIT License
+Copyright (c) 2026 proteus-automatic-api contributors
+```
+
+其中有 2 个文件为适配中文版 Proteus 8.16 SP3 做过修改（`component_codec.py`、
+`proteus_session.py`），逐字节差异见 `patches/`。其余 13 个与上游一致。
+`python/papi.py` 与 `python/proteus_env.py` 为本项目自有代码。
+
 ## 自有代码（MIT，见 LICENSE）
 
 | 文件 | 说明 |

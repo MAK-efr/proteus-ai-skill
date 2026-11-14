@@ -8,6 +8,33 @@
 
 ---
 
+### English TL;DR
+
+Drive **Proteus 8.16 (SP3)** from Python with no screen coordinates and no simulated clicks —
+everything goes through native menu commands (`WM_COMMAND`), read-only process memory, and
+ADI property import. What it gives you:
+
+- **Edit circuits as code** — create/modify `.pdsprj` (place parts, wire nets, set properties)
+- **Run Cortex-M3 simulation deterministically** — `run_exact(t)` advances to an exact sim time and stops
+- **Read the result without a screenshot** — replay GPIO event streams into LCD text (`tools/lcdgpio.py`)
+- **Assert, don't eyeball** — Intel HEX vector-table check, netlist checks, wire-crossing geometry
+
+The interesting part is not the happy path but the **failure catalogue**: two upstream API calls are
+broken on stock Proteus 8.16, `Graph/Add Traces` silently no-ops when no graph object exists,
+`press/release/set_switch` throw unless `bind_controls()` ran before `save()`, and PDS self-terminates
+about half the time after starting a simulation. Each entry in `docs/LIMITS.md` records the symptom,
+the discriminator that tells it apart from a similar-looking bug, and the workaround — all measured,
+not guessed.
+
+Tested on: Windows 11, Proteus 8.16.36097, Python 3.13. Everything is path-portable via
+`PROTEUS_PDS` / `PROTEUS_LIBRARY` env vars; a fresh `git clone` imports clean with no pip installs.
+Proteus itself, its device library, and Keil/armcc are **not** bundled.
+
+Requires: Windows, Proteus 8.16, Python ≥ 3.10 (Pillow only for the screenshot tools).
+
+
+---
+
 ## 一、它到底能干什么
 
 | 能力 | 入口 | 已验证 |

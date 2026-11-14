@@ -27,9 +27,7 @@ import time
 from ctypes import wintypes as w
 from pathlib import Path
 
-import os
-SP = os.environ.get("PROTEUS_PYSITE",
-                    r"C:\Users\32500\.workbuddy\binaries\python\envs\proteus\Lib\site-packages")
+SP = r"C:\Users\32500\.workbuddy\binaries\python\envs\proteus\Lib\site-packages"
 import sys
 if SP not in sys.path:
     sys.path.insert(0, SP)
@@ -191,6 +189,64 @@ class Sim:
 
     def stop(self):
         return self.sim.stop()
+
+    # ---------------- 控件（按钮 / 开关）----------------
+    # 2026-11-14 实测（Proteus 8.16 SP3）：
+    #   * 必须在**保存工程之前**用 Circuit.bind_controls(ref...) 绑定过，否则
+    #     press/release/set_switch 会抛
+    #     "B1: use Circuit.bind_controls() before saving and opening the project"。
+    #   * 未绑定时 controls() 仍然列得出器件，但 bound=False —— 可以当预检用。
+    #   * 绑定后实测：BUTTON idle=0 press=1 release=0；SWITCH closed=1 open=0。
+    def controls(self):
+        """列出可编程的二进制执行器：[{ref, device, state, kind, bound}]。"""
+        return self.sim.controls()
+
+    def control_state(self, ref):
+        return self.sim.control_state(ref)
+
+    def press(self, ref):
+        """按下瞬时按钮（BUTTON / SW-SPST-MOM）。需要事先 bind_controls。"""
+        return self.sim.press(ref)
+
+    def release(self, ref):
+        return self.sim.release(ref)
+
+    def set_switch(self, ref, closed):
+        """设置开关位置（SWITCH / SW-SPST / LOGICSTATE）。需要事先 bind_controls。"""
+        return self.sim.set_switch(ref, closed)
+
+    # ---------------- graph / 模拟量轨迹 ----------------
+    def graphs(self):
+        """列出工程里已有的 graph 对象；没有 graph 时返回空列表。"""
+        from measurements import graphs as _graphs
+        return _graphs(self.session)
+
+    def add_traces(self, timeout=8.0):
+        """Graph/Add Traces（原生命令 562）。
+
+        2026-11-14 实测：**工程里没有 graph 对象时，这条命令是彻底的空操作** ——
+        不弹对话框、不报错、不产生任何新窗口（实测发命令后 1/2/3 秒窗口数恒为 1）。
+        所以这里先断言有 graph，再确认真的弹了窗口，避免调用方以为"点了但没反应"。
+        """
+        if not self.graphs():
+            raise RuntimeError(
+                "工程里没有 graph 对象，Graph/Add Traces 会静默无响应。"
+                "graph 无法程序化创建（不在器件库里、没有菜单入口、官方样例是 CDB v8 "
+                "读不了、只能从工具栏放）。可行做法：在**模板工程**里手工放一个 "
+                "Analogue Graph 并保存，之后所有由该模板重建的工程都自带 graph。")
+        before = {r["hwnd"] for r in native.windows(self.session.pid)}
+        self.cmd(562)
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if {r["hwnd"] for r in native.windows(self.session.pid)} - before:
+                return True
+            time.sleep(0.1)
+        raise RuntimeError("Graph/Add Traces 已发送，但 %ss 内没有出现新窗口" % timeout)
+
+    def export_csv(self, graph, destination, **kwargs):
+        """把一个已有 graph 的曲线导出成 CSV（依赖 measurements.export_graph）。"""
+        from measurements import export_graph
+        return export_graph(self.session, graph, destination, **kwargs)
 
     # ---------------- 原生命令直发 ----------------
     def menus(self):

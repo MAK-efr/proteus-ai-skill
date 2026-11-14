@@ -63,3 +63,37 @@ run 3: attempt 1/3 failed: run_exact(2.0) 中止：引擎状态=exited returncod
 - 与固件写入序列 `"T1"+lcd_deg(t0)+' ' + "T2"+lcd_deg(t1)+' '` / `"T3"+lcd_deg(t2)+" H"+bit+" C"+bit+' '` 完全对应
 
 ⇒ 截图不是"看起来有字"，而是能对上**字符级**的写入顺序。
+
+## 7. `Graph/Add Traces` 为什么"点了没反应"（2026-11-14 实测）
+
+结论：**没有 graph 对象时这条命令是彻底的空操作**，不是超时也不是权限问题。
+
+| 观测 | 结果 |
+|---|---|
+| `Graph` 菜单 9 项全部 `enabled=True`（即使没有 graph） | 菜单不置灰，误导性强 |
+| 发 `WM_COMMAND 562` 后 1 / 2 / 3 秒的顶层窗口数 | 恒为 **1**（只有主窗口），新增 0 |
+| 是否抛异常 | 否 |
+
+为什么造不出 graph（四条路都堵死）：
+
+1. **不在器件库里** —— 54 次搜索里 `GRAPH` 只命中 `LED-BARGRAPH-*`，没有 `ANALOGUE`/`GRAPH` 这类图元；
+2. **没有菜单入口** —— 139 条菜单项里没有任何 "New Graph / Place Graph"；
+3. **克隆不了** —— `D:\Proteus\SAMPLES\Graph Based Simulation\*.pdsprj` 全是 CDB v8：
+   `Requires CDB v7, one-sheet layout` / `Unsupported sheet objects` / `Unknown CDB component table`；
+4. **只能从工具栏放** —— 而工具栏按钮 id 无法从菜单枚举拿到。
+
+⇒ 现在的处理：`papi.add_traces()` 先 `graphs()` 预检，空就 **0.00 秒**抛一条能照做的错，
+不再让人以为"点了但没反应"。真正可行的路子是**模板工程**：手工放一次 Analogue Graph，
+之后所有由它重建的工程都自带 graph，`graphs()` / `export_csv()` 就全自动了。
+
+## 8. `press / release / set_switch` 到底要不要 `bind_controls`
+
+答案：**必须要，而且必须发生在保存工程之前**。用两个只差一个参数的工程做对照：
+
+| 工程 | `bind_controls` | `controls()` | `press/release` | `set_switch` |
+|---|---|---|---|---|
+| `t9.pdsprj` | 未调用 | 列得出 B1/SW1，但 `bound=False` | ❌ `RuntimeError: B1: use Circuit.bind_controls() before saving and opening the project` | ❌ 同上 |
+| `t9b.pdsprj` | `bind_controls("B1","SW1")` | `bound=True` | ✅ `idle=0 press=1 release=0` | ✅ `closed=1 open=0` |
+
+所以 `controls()[i]["bound"]` 可以当预检开关；`kind` 也如实区分 `momentary`（BUTTON）
+与 `latched`（SWITCH）。

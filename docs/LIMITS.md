@@ -86,3 +86,46 @@ STM32 模型带 `CLOCK_SCALE` 属性（`Off` / `4 Times` / `8 Times` / `16 Times
 2. 第一段和最后一段走线必须与引脚的出线方向一致
 3. 不允许零长度线段
 4. `c.move()` 是**绝对坐标**，不是增量
+
+---
+
+## 8. graph 对象无法程序化创建（`Add Traces` 静默空操作的根因）
+
+`Graph/Add Traces...`（命令 562）在**工程里没有 graph 对象**时：
+
+- 菜单项仍然 `enabled=True`（不会置灰，所以看不出问题）
+- 发 `WM_COMMAND` 之后不弹对话框、不报错、**1/2/3 秒后新增窗口数恒为 0**
+
+四条造图的路都不通：
+
+1. **不在器件库里** —— 全库 56694 个器件里 `GRAPH` 只命中 `LED-BARGRAPH-*`（那是 LED 条），
+   没有 `ANALOGUE GRAPH` 这种图元。
+2. **没有菜单入口** —— 139 条菜单项里没有任何 `New Graph` / `Place Graph`。
+3. **克隆不了** —— 官方 `D:\Proteus\SAMPLES\Graph Based Simulation\*.pdsprj` 全是 CDB v8，
+   我们的 codec 直接拒绝：`Requires CDB v7, one-sheet layout` / `Unsupported sheet objects` /
+   `Unknown CDB component table`。
+4. **只能从工具栏放** —— 而工具栏按钮的 command id 拿不到（菜单枚举里没有）。
+
+**可行做法（模板工程）**：在作为 BASE 的工程里手工放一个 `Analogue Graph` 并保存。
+由于所有工程都是 `Circuit.open(BASE)` 再加器件的，**之后重建的每个工程都自带 graph**，
+`graphs()` / `export_csv()` 全程自动。这一步只需人工做一次。
+
+`papi.Sim.add_traces()` 已加预检：没有 graph 就 0.00 秒抛一条写明出路的错，
+不会再出现"点了但没反应"。
+
+---
+
+## 9. `press` / `release` / `set_switch` 必须 `bind_controls`，且必须在保存之前
+
+对照实验（两个工程只差一行 `bind_controls`）：
+
+| 工程 | 绑定 | `controls()` | 结果 |
+|---|---|---|---|
+| 未绑定 | — | 能列出 `B1`/`SW1`，但 `bound=False` | `RuntimeError: B1: use Circuit.bind_controls() before saving and opening the project` |
+| 已绑定 | `c.bind_controls("B1","SW1")` | `bound=True` | `idle=0 press=1 release=0`；`closed=1 open=0` ✅ |
+
+要点：
+- 绑定必须写在 `c.save(...)` **之前**，打开工程之后补绑无效；
+- `controls()` 的 `bound` 字段可以直接当预检；
+- `kind` 会区分 `momentary`（BUTTON，按一下弹回）与 `latched`（SWITCH，保持位置）；
+- 支持的器件：`BUTTON`、`SW-SPST`、`SW-SPST-MOM`、`SWITCH`、`LOGICSTATE`、`LOGICTOGGLE`。

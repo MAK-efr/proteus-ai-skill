@@ -22,6 +22,14 @@
 | 校验 Intel HEX 的向量表（SP/RESET 是否合法） | `tools/checkhex.py` | ✅ |
 | 统计走线交叉、走线压到无关引脚 | `tools/crossings.py` | ✅ |
 | 用 armcc + fromelf 出 hex 并顺手断言 | `tools/build_cal.ps1` | ✅ |
+| 程序化按按钮 / 拨开关 | `Sim.press/release/set_switch` | ✅ 需先 `bind_controls` |
+| 读模拟量曲线并导出 CSV | `Sim.graphs()` / `export_csv()` | ⚠️ 仅当工程里已有 graph，见下 |
+
+> ⚠️ **`Graph/Add Traces` 在没有 graph 对象时是静默空操作**（不弹框、不报错、0 个新窗口）。
+> graph 也无法程序化创建：不在器件库里、没有菜单入口、官方样例是 CDB v8 读不了。
+> 现在 `Sim.add_traces()` 会先预检并**立刻报错**。可行做法是在**模板工程**里手工放一次
+> Analogue Graph，之后所有由该模板重建的工程都自带 graph，`graphs()`/`export_csv()`
+> 就完全自动化了。细节见 `docs/VERIFY.md` 第 7 节。
 
 ---
 

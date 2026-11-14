@@ -438,3 +438,25 @@ PDS 8.16 SP3 约 **1/2** 概率在"启动后刚推进仿真"时自杀（退出�
 > 卡住 → 先枚举窗口：有 `#32770` 或 `Reports Uploading` 就是弹框，点掉再重试；
 > 没弹框但 `state=exited` → 引擎死了，看 `returncode`；
 > `state=paused` 且 `reason` 有 `Breakpoint 171` → 半主机断点，`start()` 再来一次。
+
+---
+
+## 2026-11-14 追加二：graph 与可控器件的实测结论
+
+### `Graph/Add Traces` 没有 graph 时是静默空操作
+
+发 `WM_COMMAND 562` 后 1/2/3 秒新增窗口数恒为 0，不报错。菜单项也不置灰，特别容易误判成"超时"。
+
+graph **无法程序化创建**：不在器件库、没有菜单入口、官方样例是 CDB v8（codec 读不了）、
+只能从工具栏放而工具栏 id 拿不到。
+
+⇒ 用**模板工程**：在 BASE 工程里手工放一次 `Analogue Graph`，之后 `Circuit.open(BASE)`
+重建出来的每个工程都自带 graph，`papi.add_traces()` / `export_csv()` 就自动了。
+`add_traces()` 现在会预检并立即报错，不会静默。
+
+### `press/release/set_switch` 必须预先 `bind_controls`
+
+未绑定：`RuntimeError: B1: use Circuit.bind_controls() before saving and opening the project`
+（而且必须写在 `save()` 之前）。
+已绑定实测：`BUTTON idle=0 press=1 release=0`、`SWITCH closed=1 open=0`。
+`controls()` 的 `bound` 字段可当预检；`kind` 区分 `momentary` / `latched`。
